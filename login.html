@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OptiC — Acesso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Roboto+Condensed:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
+<style>
+  *, *::before, *::after {
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+  }
+
+  :root {
+    --night:   #0D1B2A;
+    --ocean:   #1A6B8A;
+    --ocean-l: #2589AD;
+    --mist:    #E8F4F8;
+    --gold:    #C9A84C;
+    --white:   #FFFFFF;
+    --border:  #D6E8EF;
+    --text-2:  #4A6478;
+    --error:   #C0392B;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--mist);
+    font-family: 'Roboto Condensed', sans-serif;
+    color: var(--night);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .form-eyebrow,
+  .field label,
+  .forgot a,
+  .form-footer {
+    font-family: 'Roboto Condensed', sans-serif;
+    letter-spacing: 0.08em;
+  }
+
+  input,
+  button {
+    font-family: 'Roboto Condensed', sans-serif;
+  }
+
+  /* ── Layout ── */
+  .page {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* ── Lado esquerdo — painel visual ── */
+  .panel {
+    position: relative;
+    background: var(--night);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+    overflow: hidden;
+  }
+
+  /* Gradiente sutil no painel */
+  .panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(26,107,138,0.35) 0%, transparent 65%),
+                radial-gradient(ellipse at 80% 80%, rgba(201,168,76,0.08) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* Anel SVG animado */
+  .lens-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.07;
+    animation: slow-spin 28s linear infinite;
+  }
+  .lens-ring-2 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.05;
+    animation: slow-spin-rev 40s linear infinite;
+  }
+
+  @keyframes slow-spin     { to { transform: translate(-50%,-50%) rotate(360deg); } }
+  @keyframes slow-spin-rev { to { transform: translate(-50%,-50%) rotate(-360deg); } }
+  
+  @media (prefers-reduced-motion: reduce) {
+    .lens-ring, .lens-ring-2 { animation: none; }
+  }
+
+  .panel-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+
+  /* Ajuste do tamanho da logo em imagem */
+  .panel-logo-img {
+    max-width: 85%;
+    height: auto;
+    max-height: 110px; 
+    object-fit: contain;
+    margin-bottom: 0.5rem;
+    display: inline-block;
+  }
+
+  .panel-sub {
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 3.5rem;
+  }
+
+  .panel-tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+    color: rgba(255,255,255,0.55);
+    line-height: 1.65;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+
+  /* Linha decorativa */
+  .divider-line {
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.6;
+    margin: 2rem auto;
+  }
+
+  /* ── Lado direito — formulário ── */
+  .form-side {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem 2rem;
+    background: var(--white);
+  }
+
+  .form-box {
+    width: 100%;
+    max-width: 360px;
+    animation: fade-up 0.5s ease both;
+  }
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .form-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .form-eyebrow {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ocean);
+    margin-bottom: 0.6rem;
+  }
+
+  .form-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.4rem;
+    font-weight: 400;
+    color: var(--night);
+    line-height: 1.2;
+  }
+
+  .form-title em {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--text-2);
+  }
+
+  /* Campos */
+  .field {
+    margin-bottom: 1.25rem;
+  }
+
+  .field label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--text-2);
+    margin-bottom: 0.45rem;
+    text-transform: uppercase;
+  }
+
+  .input-wrap {
+    position: relative;
+  }
+
+  .input-wrap input {
+    width: 100%;
+    padding: 0.9rem 1rem 0.9rem 2.7rem;
+    font-size: 0.95rem;
+    font-family: 'Roboto Condensed', sans-serif;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: var(--mist);
+    color: var(--night);
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+  }
+
+  .input-wrap input:focus {
+    border-color: var(--ocean);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(26,107,138,0.1);
+  }
+
+  .input-wrap input.error {
+    border-color: var(--error);
+    box-shadow: 0 0 0 3px rgba(192,57,43,0.08);
+  }
+
+  .input-icon {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-2);
+    font-size: 0.95rem;
+    pointer-events: none;
+    transition: color 0.18s;
+  }
+
+  .input-wrap input:focus ~ .input-icon,
+  .input-wrap:focus-within .input-icon {
+    color: var(--ocean);
+  }
+
+  .toggle-pw {
+    position: absolute;
+    right: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-2);
+    cursor: pointer;
+    padding: 2px;
+    font-size: 0.85rem;
+    line-height: 1;
+    transition: color 0.15s;
+  }
+  .toggle-pw:hover { color: var(--ocean); }
+
+  /* Erro inline */
+  .error-msg {
+    display: none;
+    font-size: 0.72rem;
+    color: var(--error);
+    margin-top: 0.35rem;
+    padding-left: 0.2rem;
+  }
+  .error-msg.show { display: block; }
+
+  /* Esqueci */
+  .forgot {
+    text-align: right;
+    margin-top: -0.5rem;
+    margin-bottom: 2rem;
+  }
+  .forgot a {
+    font-size: 0.8rem;
+    color: var(--text-2);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .forgot a:hover { color: var(--ocean); }
+
+  /* Botão */
+  .btn-login {
+    width: 100%;
+    padding: 1rem;
+    background: var(--night);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.12s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-login:hover {
+    background: var(--ocean);
+    box-shadow: 0 6px 20px rgba(26,107,138,0.25);
+  }
+
+  .btn-login:active { transform: scale(0.985); }
+
+  /* Ripple no botão */
+  .btn-login .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    transform: scale(0);
+    animation: ripple 0.55s linear;
+    pointer-events: none;
+  }
+  @keyframes ripple {
+    to { transform: scale(4); opacity: 0; }
+  }
+
+  /* Loading spinner */
+  .btn-login .spinner {
+    display: none;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .btn-login.loading .btn-text { display: none; }
+  .btn-login.loading .spinner { display: block; }
+
+  /* Rodapé */
+  .form-footer {
+    margin-top: 3rem;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-2);
+    letter-spacing: 0.1em;
+  }
+
+  /* Toast de erro */
+  .toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--error);
+    color: #fff;
+    padding: 0.65rem 1.4rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    z-index: 99;
+    pointer-events: none;
+  }
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  /* Responsivo */
+  @media (max-width: 768px) {
+    .page { grid-template-columns: 1fr; }
+    .panel { display: none; }
+    .form-side {
+      min-height: 100vh;
+      background: linear-gradient(160deg, var(--mist) 0%, var(--white) 60%);
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="panel" role="presentation" aria-hidden="true">
+    <svg class="lens-ring" width="600" height="600" viewBox="0 0 600 600" fill="none">
+      <ellipse cx="300" cy="300" rx="260" ry="120" stroke="white" stroke-width="1.5"/>
+      <ellipse cx="300" cy="300" rx="200" ry="80"  stroke="white" stroke-width="0.8"/>
+      <ellipse cx="300" cy="300" rx="150" ry="40"  stroke="white" stroke-width="0.5"/>
+      <circle  cx="300" cy="300" r="4" fill="white" opacity="0.6"/>
+    </svg>
+    <svg class="lens-ring-2" width="700" height="700" viewBox="0 0 700 700" fill="none">
+      <ellipse cx="350" cy="350" rx="310" ry="140" stroke="#C9A84C" stroke-width="0.8"/>
+      <ellipse cx="350" cy="350" rx="240" ry="90"  stroke="white"   stroke-width="0.4"/>
+    </svg>
+
+    <div class="panel-content">
+      <img src="optiC logo cinza.png" alt="Logo OptiC" class="panel-logo-img"/>
+      <div class="panel-sub">Gestão Inteligente para Óticas</div>
+      <div class="divider-line"></div>
+      <p class="panel-tagline">
+        A consulta certa,<br/>no momento certo,<br/>para cada cliente.
+      </p>
+    </div>
+  </div>
+
+  <div class="form-side">
+    <div class="form-box">
+
+      <div class="form-header">
+        <div class="form-eyebrow"></div>
+        <h1 class="form-title">Uma ferramente simples que<br/>muda tudo!<em></em></h1>
+      </div>
+
+      <form id="loginForm" novalidate>
+
+        <div class="field">
+          <label for="email">Usuário</label>
+          <div class="input-wrap">
+            <input type="text" id="email" name="email" placeholder="seu@email.com" autocomplete="username" spellcheck="false"/>
+            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <div class="error-msg" id="emailErr">Por favor, informe seu usuário.</div>
+        </div>
+
+        <div class="field">
+          <label for="password">Senha</label>
+          <div class="input-wrap">
+            <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password"/>
+            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <button type="button" class="toggle-pw" id="togglePw" aria-label="Mostrar senha">
+              <svg id="eyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <div class="error-msg" id="passErr">Por favor, informe sua senha.</div>
+        </div>
+
+        <div class="forgot">
+          <a href="#">Esqueci minha senha</a>
+        </div>
+
+        <button type="submit" class="btn-login" id="loginBtn">
+          <span class="btn-text">Entrar</span>
+          <div class="spinner" role="status"></div>
+        </button>
+
+      </form>
+
+      <div class="form-footer">OptiC &nbsp;·&nbsp; Sistema interno</div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="alert"></div>
+
+<script>
+  const pwInput  = document.getElementById('password');
+  const togglePw = document.getElementById('togglePw');
+  const eyeIcon  = document.getElementById('eyeIcon');
+
+  const eyeOpen = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+  const eyeShut = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+
+  togglePw.addEventListener('click', () => {
+    const isText = pwInput.type === 'text';
+    pwInput.type = isText ? 'password' : 'text';
+    eyeIcon.innerHTML = isText ? eyeOpen : eyeShut;
+  });
+
+  const btn = document.getElementById('loginBtn');
+  btn.addEventListener('click', function(e) {
+    if (btn.classList.contains('loading')) return; 
+    const r = document.createElement('span');
+    r.className = 'ripple';
+    const rect = btn.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    r.style.width = r.style.height = size + 'px';
+    r.style.left = (e.clientX - rect.left - size/2) + 'px';
+    r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
+    btn.appendChild(r);
+    setTimeout(() => r.remove(), 600);
+  });
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3200);
+  }
+
+  const form     = document.getElementById('loginForm');
+  const emailIn  = document.getElementById('email');
+  const emailErr = document.getElementById('emailErr');
+  const passErr  = document.getElementById('passErr');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    emailIn.classList.remove('error');
+    pwInput.classList.remove('error');
+    emailErr.classList.remove('show');
+    passErr.classList.remove('show');
+
+    let valid = true;
+    if (!emailIn.value.trim()) {
+      emailIn.classList.add('error');
+      emailErr.classList.add('show');
+      valid = false;
+    }
+    if (!pwInput.value) {
+      pwInput.classList.add('error');
+      passErr.classList.add('show');
+      valid = false;
+    }
+    if (!valid) return;
+
+    btn.classList.add('loading');
+    btn.disabled = true;
+    await new Promise(r => setTimeout(r, 1400));
+    btn.classList.remove('loading');
+    btn.disabled = false;
+
+    if (emailIn.value.trim() === 'admin' && pwInput.value === '1234') {
+      btn.style.background = '#1a7a4a';
+      btn.querySelector('.btn-text').textContent = '✓ Acesso autorizado';
+      setTimeout(() => { window.location.href = 'catalogo.html'; }, 800);
+    } else {
+      showToast('Usuário ou senha incorretos.');
+      pwInput.value = '';
+      pwInput.focus();
+    }
+  });
+</script>
+</body>
+</html>
