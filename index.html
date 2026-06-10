@@ -1,331 +1,558 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OptiC - Consulta de Lentes e Orçamento</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap');
-    
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    body { background: #f8f9fa; }
-    /* Ajustado para ocupar 100% da largura da página (Ideal para Computador) */
-    .app { background: #fff; min-height: 100vh; font-family: 'Barlow', sans-serif; color: #1a1a2e; padding-bottom: 140px; width: 100%; margin: 0; box-shadow: none; position: relative; }
-    
-    .topbar { background: #42a5f5; padding: 12px 20px; display: flex; align-items: center; gap: 16px; }
-    .topbar i { font-size: 22px; color: #fff; cursor: pointer; }
-    
-    .header { padding: 20px 20px 12px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid #e8f4fe; }
-    .logo-wrap { display: flex; align-items: center; gap: 10px; }
-    
-    .logo-icon { height: 45px; width: auto; max-width: 180px; object-fit: contain; }
-    .logo-text { font-family: 'Barlow Condensed', sans-serif; font-size: 30px; font-weight: 700; color: #0d47a1; letter-spacing: -0.5px; }
-    .logo-text span { color: #42a5f5; }
-    .logo-sub { font-size: 10px; font-weight: 600; color: #78909c; letter-spacing: 0.8px; margin-top: -2px; }
-    
-    .search-section { padding: 16px 20px; background: #fafafa; border-bottom: 1px solid #f0f0f0; }
-    .search-wrapper { position: relative; max-width: 800px; margin: 0 auto; } /* Centraliza e limita a barra de busca no PC */
-    .search-wrapper i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #90a4ae; font-size: 18px; }
-    .search-input { width: 100%; padding: 14px 16px 14px 42px; border: 1.5px solid #cfd8dc; border-radius: 8px; font-size: 16px; font-family: inherit; transition: all 0.2s; outline: none; color: #1a1a2e; }
-    .search-input:focus { border-color: #42a5f5; box-shadow: 0 0 0 3px rgba(66, 165, 245, 0.15); }
-    
-    .nav-tabs { display: flex; border-bottom: 2px solid #f0f0f0; background: #fff; gap: 4px; padding: 0 20px; }
-    .tab-btn { flex: 1; text-align: center; padding: 16px 10px; border: none; background: none; font-size: 14px; font-weight: 600; color: #78909c; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; font-family: inherit; transition: all 0.2s; white-space: nowrap; }
-    .tab-btn.active { color: #0d47a1; border-bottom-color: #0d47a1; font-size: 15px; }
-    
-    .brand-bar { padding: 14px 20px; background: #fff; display: flex; gap: 12px; border-bottom: 1px solid #f0f0f0; padding-left: 20px; }
-    .brand-btn { padding: 8px 20px; border: 1px solid #cfd8dc; border-radius: 20px; background: #fff; font-size: 14px; font-weight: 500; color: #546e7a; cursor: pointer; font-family: inherit; transition: all 0.15s; }
-    .brand-btn.active { background: #e3f2fd; color: #0d47a1; border-color: #90caf9; font-weight: 600; }
-    
-    .meta-bar { padding: 12px 20px; background: #fdfdfd; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f5f5f5; min-height: 42px; }
-    .count-text { font-size: 13px; color: #78909c; font-weight: 500; }
-    
-    /* Resultados em Grid no computador para aproveitar o espaço largo da tela */
-    .results-list { padding: 15px 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 12px; }
-    .result-item { padding: 16px 20px; border: 1px solid #f0f0f0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; transition: all 0.15s; cursor: pointer; background: #fff; }
-    .result-item:hover { background: #f5f9ff; border-color: #90caf9; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-    .result-item:active { background: #e3f2fd; }
-    .result-name { font-size: 14px; font-weight: 500; color: #2c3e50; line-height: 1.4; padding-right: 12px; }
-    .result-price { font-size: 16px; font-weight: 700; color: #2e7d32; white-space: nowrap; background: #e8f5e9; padding: 6px 12px; border-radius: 6px; }
-    
-    .empty { padding: 80px 20px; text-align: center; color: #90a4ae; font-size: 15px; display: flex; flex-direction: column; align-items: center; gap: 12px; grid-column: 1 / -1; }
-    .empty i { font-size: 40px; color: #b0bec5; }
-    
-    /* MODAL DE DETALHES */
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-    .modal { background: #fff; width: 100%; max-width: 500px; border-radius: 12px; padding: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); position: relative; animation: fadeInUp 0.3s ease; }
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    .modal-close { position: absolute; top: 18px; right: 18px; font-size: 24px; color: #90a4ae; cursor: pointer; }
-    .modal-title { font-size: 20px; font-weight: 700; color: #0d47a1; margin-bottom: 20px; padding-right: 24px; border-bottom: 2px solid #e3f2fd; padding-bottom: 10px; text-transform: uppercase; }
-    .modal-info { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
-    .info-row { display: flex; justify-content: space-between; font-size: 15px; border-bottom: 1px dashed #f0f0f0; padding-bottom: 8px; }
-    .info-label { color: #78909c; font-weight: 500; }
-    .info-value { color: #1a1a2e; font-weight: 600; text-transform: uppercase; }
-    .info-value.price { color: #2e7d32; font-size: 20px; font-weight: 700; }
-    .btn-add-budget { width: 100%; background: #0d47a1; color: #fff; border: none; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
-    .btn-add-budget:hover { background: #1565c0; }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OptiC — Acesso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Roboto+Condensed:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 
-    /* BARRA FIXA DE ORÇAMENTO TOTALMENTE EXPANDIDA PARA O MONITOR */
-    .budget-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 4px solid #42a5f5; box-shadow: 0 -5px 20px rgba(0,0,0,0.08); padding: 16px 40px; z-index: 999; display: flex; flex-direction: column; gap: 10px; }
-    .budget-container { max-width: 1200px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 10px; }
-    .budget-header { display: flex; justify-content: space-between; align-items: center; }
-    .budget-title { font-size: 14px; font-weight: 700; color: #546e7a; display: flex; align-items: center; gap: 6px; }
-    .btn-clear-budget { background: none; border: none; color: #e53935; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-    .budget-lens-name { font-size: 14px; color: #1a1a2e; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .budget-inputs { display: flex; gap: 30px; align-items: center; }
-    .input-frame-wrapper { width: 250px; position: relative; }
-    .input-frame-wrapper span { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #78909c; font-weight: 600; }
-    .input-frame { width: 100%; padding: 10px 10px 10px 36px; border: 1.5px solid #cfd8dc; border-radius: 6px; font-size: 15px; font-family: inherit; font-weight: 600; color: #1a1a2e; outline: none; }
-    .input-frame:focus { border-color: #42a5f5; }
-    .budget-total { text-align: right; white-space: nowrap; margin-left: auto; }
-    .total-label { font-size: 12px; font-weight: 600; color: #78909c; display: block; margin-bottom: -2px; }
-    .total-val { font-size: 24px; font-weight: 700; color: #2e7d32; }
+<style>
+  *, *::before, *::after {
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+  }
 
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .animate-spin { animation: spin 1s linear infinite; display: inline-block; }
-  </style>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  :root {
+    --night:   #0D1B2A;
+    --ocean:   #1A6B8A;
+    --ocean-l: #2589AD;
+    --mist:    #E8F4F8;
+    --gold:    #C9A84C;
+    --white:   #FFFFFF;
+    --border:  #D6E8EF;
+    --text-2:  #4A6478;
+    --error:   #C0392B;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--mist);
+    font-family: 'Roboto Condensed', sans-serif;
+    color: var(--night);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .form-eyebrow,
+  .field label,
+  .forgot a,
+  .form-footer {
+    font-family: 'Roboto Condensed', sans-serif;
+    letter-spacing: 0.08em;
+  }
+
+  input,
+  button {
+    font-family: 'Roboto Condensed', sans-serif;
+  }
+
+  /* ── Layout ── */
+  .page {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* ── Lado esquerdo — painel visual ── */
+  .panel {
+    position: relative;
+    background: var(--night);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+    overflow: hidden;
+  }
+
+  /* Gradiente sutil no painel */
+  .panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(26,107,138,0.35) 0%, transparent 65%),
+                radial-gradient(ellipse at 80% 80%, rgba(201,168,76,0.08) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* Anel SVG animado */
+  .lens-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.07;
+    animation: slow-spin 28s linear infinite;
+  }
+  .lens-ring-2 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.05;
+    animation: slow-spin-rev 40s linear infinite;
+  }
+
+  @keyframes slow-spin     { to { transform: translate(-50%,-50%) rotate(360deg); } }
+  @keyframes slow-spin-rev { to { transform: translate(-50%,-50%) rotate(-360deg); } }
+  
+  @media (prefers-reduced-motion: reduce) {
+    .lens-ring, .lens-ring-2 { animation: none; }
+  }
+
+  .panel-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+
+  /* Ajuste do tamanho da logo em imagem */
+  .panel-logo-img {
+    max-width: 85%;
+    height: auto;
+    max-height: 110px; 
+    object-fit: contain;
+    margin-bottom: 0.5rem;
+    display: inline-block;
+  }
+
+  .panel-sub {
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 3.5rem;
+  }
+
+  .panel-tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+    color: rgba(255,255,255,0.55);
+    line-height: 1.65;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+
+  /* Linha decorativa */
+  .divider-line {
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.6;
+    margin: 2rem auto;
+  }
+
+  /* ── Lado direito — formulário ── */
+  .form-side {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem 2rem;
+    background: var(--white);
+  }
+
+  .form-box {
+    width: 100%;
+    max-width: 360px;
+    animation: fade-up 0.5s ease both;
+  }
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .form-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .form-eyebrow {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ocean);
+    margin-bottom: 0.6rem;
+  }
+
+  .form-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.4rem;
+    font-weight: 400;
+    color: var(--night);
+    line-height: 1.2;
+  }
+
+  .form-title em {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--text-2);
+  }
+
+  /* Campos */
+  .field {
+    margin-bottom: 1.25rem;
+  }
+
+  .field label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--text-2);
+    margin-bottom: 0.45rem;
+    text-transform: uppercase;
+  }
+
+  .input-wrap {
+    position: relative;
+  }
+
+  .input-wrap input {
+    width: 100%;
+    padding: 0.9rem 1rem 0.9rem 2.7rem;
+    font-size: 0.95rem;
+    font-family: 'Roboto Condensed', sans-serif;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: var(--mist);
+    color: var(--night);
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+  }
+
+  .input-wrap input:focus {
+    border-color: var(--ocean);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(26,107,138,0.1);
+  }
+
+  .input-wrap input.error {
+    border-color: var(--error);
+    box-shadow: 0 0 0 3px rgba(192,57,43,0.08);
+  }
+
+  .input-icon {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-2);
+    font-size: 0.95rem;
+    pointer-events: none;
+    transition: color 0.18s;
+  }
+
+  .input-wrap input:focus ~ .input-icon,
+  .input-wrap:focus-within .input-icon {
+    color: var(--ocean);
+  }
+
+  .toggle-pw {
+    position: absolute;
+    right: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-2);
+    cursor: pointer;
+    padding: 2px;
+    font-size: 0.85rem;
+    line-height: 1;
+    transition: color 0.15s;
+  }
+  .toggle-pw:hover { color: var(--ocean); }
+
+  /* Erro inline */
+  .error-msg {
+    display: none;
+    font-size: 0.72rem;
+    color: var(--error);
+    margin-top: 0.35rem;
+    padding-left: 0.2rem;
+  }
+  .error-msg.show { display: block; }
+
+  /* Esqueci */
+  .forgot {
+    text-align: right;
+    margin-top: -0.5rem;
+    margin-bottom: 2rem;
+  }
+  .forgot a {
+    font-size: 0.8rem;
+    color: var(--text-2);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .forgot a:hover { color: var(--ocean); }
+
+  /* Botão */
+  .btn-login {
+    width: 100%;
+    padding: 1rem;
+    background: var(--night);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.12s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-login:hover {
+    background: var(--ocean);
+    box-shadow: 0 6px 20px rgba(26,107,138,0.25);
+  }
+
+  .btn-login:active { transform: scale(0.985); }
+
+  /* Ripple no botão */
+  .btn-login .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    transform: scale(0);
+    animation: ripple 0.55s linear;
+    pointer-events: none;
+  }
+  @keyframes ripple {
+    to { transform: scale(4); opacity: 0; }
+  }
+
+  /* Loading spinner */
+  .btn-login .spinner {
+    display: none;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .btn-login.loading .btn-text { display: none; }
+  .btn-login.loading .spinner { display: block; }
+
+  /* Rodapé */
+  .form-footer {
+    margin-top: 3rem;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-2);
+    letter-spacing: 0.1em;
+  }
+
+  /* Toast de erro */
+  .toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--error);
+    color: #fff;
+    padding: 0.65rem 1.4rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    z-index: 99;
+    pointer-events: none;
+  }
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  /* Responsivo */
+  @media (max-width: 768px) {
+    .page { grid-template-columns: 1fr; }
+    .panel { display: none; }
+    .form-side {
+      min-height: 100vh;
+      background: linear-gradient(160deg, var(--mist) 0%, var(--white) 60%);
+    }
+  }
+</style>
 </head>
 <body>
 
-<div class="app">
-  <div class="topbar">
-    <i class="ti ti-chevron-left"></i>
+<div class="page">
+
+  <div class="panel" role="presentation" aria-hidden="true">
+    <svg class="lens-ring" width="600" height="600" viewBox="0 0 600 600" fill="none">
+      <ellipse cx="300" cy="300" rx="260" ry="120" stroke="white" stroke-width="1.5"/>
+      <ellipse cx="300" cy="300" rx="200" ry="80"  stroke="white" stroke-width="0.8"/>
+      <ellipse cx="300" cy="300" rx="150" ry="40"  stroke="white" stroke-width="0.5"/>
+      <circle  cx="300" cy="300" r="4" fill="white" opacity="0.6"/>
+    </svg>
+    <svg class="lens-ring-2" width="700" height="700" viewBox="0 0 700 700" fill="none">
+      <ellipse cx="350" cy="350" rx="310" ry="140" stroke="#C9A84C" stroke-width="0.8"/>
+      <ellipse cx="350" cy="350" rx="240" ry="90"  stroke="white"   stroke-width="0.4"/>
+    </svg>
+
+    <div class="panel-content">
+      <img src="optiC logo cinza.png" alt="Logo OptiC" class="panel-logo-img"/>
+      <div class="panel-sub">Gestão Inteligente para Óticas</div>
+      <div class="divider-line"></div>
+      <p class="panel-tagline">
+        A consulta certa,<br/>no momento certo,<br/>para cada cliente.
+      </p>
+    </div>
   </div>
-  
-  <div class="header">
-    <div class="logo-wrap">
-      <img src="optiC logo.jpeg" class="logo-icon" alt="Logo OptiC">
-      <div>
-        <div class="logo-text">Opti<span>C</span></div>
-        <div class="logo-sub">GESTÃO INTELIGENTE PARA ÓTICAS</div>
+
+  <div class="form-side">
+    <div class="form-box">
+
+      <div class="form-header">
+        <div class="form-eyebrow"></div>
+        <h1 class="form-title">Uma ferramente simples que<br/>muda tudo!<em></em></h1>
       </div>
+
+      <form id="loginForm" novalidate>
+
+        <div class="field">
+          <label for="email">Usuário</label>
+          <div class="input-wrap">
+            <input type="text" id="email" name="email" placeholder="seu@email.com" autocomplete="username" spellcheck="false"/>
+            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <div class="error-msg" id="emailErr">Por favor, informe seu usuário.</div>
+        </div>
+
+        <div class="field">
+          <label for="password">Senha</label>
+          <div class="input-wrap">
+            <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password"/>
+            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <button type="button" class="toggle-pw" id="togglePw" aria-label="Mostrar senha">
+              <svg id="eyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <div class="error-msg" id="passErr">Por favor, informe sua senha.</div>
+        </div>
+
+        <div class="forgot">
+          <a href="#">Esqueci minha senha</a>
+        </div>
+
+        <button type="submit" class="btn-login" id="loginBtn">
+          <span class="btn-text">Entrar</span>
+          <div class="spinner" role="status"></div>
+        </button>
+
+      </form>
+
+      <div class="form-footer">OptiC &nbsp;·&nbsp; Sistema interno</div>
+
     </div>
   </div>
-
-  <div class="search-section">
-    <div class="search-wrapper">
-      <i class="ti ti-search"></i>
-      <input type="text" id="search" class="search-input" placeholder="Buscar lente...">
-    </div>
-  </div>
-
-  <div class="nav-tabs" id="cat-tabs"></div>
-  <div class="brand-bar" id="brand-tabs"></div>
-
-  <div class="meta-bar">
-    <div class="count-text" id="count-label"></div>
-  </div>
-
-  <div class="results-list" id="results"></div>
 </div>
 
-<div class="budget-bar" id="budget-bar" style="display: none;">
-  <div class="budget-container">
-    <div class="budget-header">
-      <div class="budget-title"><i class="ti ti-calculator"></i> ORÇAMENTO DO CLIENTE</div>
-      <button class="btn-clear-budget" onclick="clearBudget()"><i class="ti ti-trash"></i> Limpar Orçamento</button>
-    </div>
-    <div class="budget-inputs">
-      <div style="flex: 2; min-width: 0;">
-        <div class="total-label">LENTE SELECIONADA</div>
-        <div class="budget-lens-name" id="budget-lens-name">-</div>
-      </div>
-      <div class="input-frame-wrapper">
-        <div class="total-label">VALOR DA ARMAÇÃO</div>
-        <span>R$</span>
-        <input type="number" id="input-frame-price" class="input-frame" placeholder="0,00" oninput="calculateTotal()">
-      </div>
-      <div class="budget-total">
-        <span class="total-label">VALOR TOTAL DO ÓCULOS</span>
-        <span class="total-val" id="budget-total-value">R$ 0,00</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
-  <div class="modal" onclick="event.stopPropagation()">
-    <i class="ti ti-x modal-close" onclick="closeModal(null)"></i>
-    <div class="modal-title" id="modal-lens-title">Detalhes da Lente</div>
-    <div class="modal-info">
-      <div class="info-row"><span class="info-label">Categoria:</span><span class="info-value" id="modal-lens-cat">-</span></div>
-      <div class="info-row"><span class="info-label">Marca/Fabricante:</span><span class="info-value" id="modal-lens-brand">-</span></div>
-      <div class="info-row" style="border:none; margin-top:10px;"><span class="info-label" style="font-size:16px; font-weight:700;">Preço da Lente:</span><span class="info-value price" id="modal-lens-price">R$ 0,00</span></div>
-    </div>
-    <button class="btn-add-budget" onclick="addSelectedToBudget()"><i class="ti ti-circle-plus"></i> Adicionar ao Orçamento</button>
-  </div>
-</div>
+<div class="toast" id="toast" role="alert"></div>
 
 <script>
-const SUPABASE_URL = "https://wcurvwdgezjixosxivfn.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_HtxQzlwkS86rb1OI2KrEbA_o44lj6vw";
+  const pwInput  = document.getElementById('password');
+  const togglePw = document.getElementById('togglePw');
+  const eyeIcon  = document.getElementById('eyeIcon');
 
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const eyeOpen = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+  const eyeShut = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`;
 
-const categories = ["SIMPLES", "SURFAÇADA", "OCUPACIONAIS", "PROGRESSIVAS"];
+  togglePw.addEventListener('click', () => {
+    const isText = pwInput.type === 'text';
+    pwInput.type = isText ? 'password' : 'text';
+    eyeIcon.innerHTML = isText ? eyeOpen : eyeShut;
+  });
 
-// Ajuste definitivo: Removido "VARILUX", mantendo apenas KODAK e ESSILOR em todas as abas
-const brandMap = {
-  "SIMPLES": ["KODAK", "ESSILOR"],
-  "SURFAÇADA": ["KODAK", "ESSILOR"],
-  "OCUPACIONAIS": ["KODAK", "ESSILOR"],
-  "PROGRESSIVAS": ["KODAK", "ESSILOR"]
-};
+  const btn = document.getElementById('loginBtn');
+  btn.addEventListener('click', function(e) {
+    if (btn.classList.contains('loading')) return; 
+    const r = document.createElement('span');
+    r.className = 'ripple';
+    const rect = btn.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    r.style.width = r.style.height = size + 'px';
+    r.style.left = (e.clientX - rect.left - size/2) + 'px';
+    r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
+    btn.appendChild(r);
+    setTimeout(() => r.remove(), 600);
+  });
 
-let activeCat = "SIMPLES";
-let activeBrand = "KODAK";
-let query = "";
-let selectedLensForBudget = null;
-let currentResults = [];
-let temporarySelectedLens = null;
-
-function formatCurrency(value) {
-  const numericValue = parseFloat(value);
-  if (isNaN(numericValue)) return "Consulte";
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(numericValue);
-}
-
-function renderCategories() {
-  const el = document.getElementById("cat-tabs");
-  el.innerHTML = categories.map(c => `
-    <button class="tab-btn ${c === activeCat ? "active" : ""}" data-cat="${c}">${c}</button>`).join("");
-  el.querySelectorAll(".tab-btn").forEach(btn => btn.addEventListener("click", () => {
-    activeCat = btn.dataset.cat;
-    activeBrand = brandMap[activeCat][0];
-    query = ""; document.getElementById("search").value = "";
-    renderAll();
-  }));
-}
-
-function renderBrandTabs() {
-  const brands = brandMap[activeCat] || [];
-  const el = document.getElementById("brand-tabs");
-  el.innerHTML = brands.map(b => `
-    <button class="brand-btn ${b === activeBrand ? "active" : ""}" data-brand="${b}">${b}</button>`).join("");
-  el.querySelectorAll(".brand-btn").forEach(btn => btn.addEventListener("click", () => {
-    activeBrand = btn.dataset.brand;
-    query = ""; document.getElementById("search").value = "";
-    renderBrandTabs(); renderResults();
-  }));
-}
-
-async function renderResults() {
-  const q = query.trim();
-  const el = document.getElementById("results");
-  const countEl = document.getElementById("count-label");
-
-  if (!q) {
-    countEl.textContent = "";
-    el.innerHTML = `
-      <div class="empty">
-        <i class="ti ti-search" aria-hidden="true"></i>
-        Digite o nome da lente acima para buscar...
-      </div>`;
-    return;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3200);
   }
 
-  el.innerHTML = `<div class="empty"><i class="ti ti-loader animate-spin"></i>Buscando no banco de dados...</div>`;
+  const form     = document.getElementById('loginForm');
+  const emailIn  = document.getElementById('email');
+  const emailErr = document.getElementById('emailErr');
+  const passErr  = document.getElementById('passErr');
 
-  try {
-    const catLowerPlural = activeCat.toLowerCase(); 
-    const catLowerSingular = catLowerPlural.endsWith('s') ? catLowerPlural.slice(0, -1) : catLowerPlural;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    emailIn.classList.remove('error');
+    pwInput.classList.remove('error');
+    emailErr.classList.remove('show');
+    passErr.classList.remove('show');
 
-    let queryBuilder = supabaseClient
-      .from('lentes')
-      .select('*')
-      .eq('marca', activeBrand.toLowerCase())
-      .ilike('nome', `%${q}%`);
+    let valid = true;
+    if (!emailIn.value.trim()) {
+      emailIn.classList.add('error');
+      emailErr.classList.add('show');
+      valid = false;
+    }
+    if (!pwInput.value) {
+      pwInput.classList.add('error');
+      passErr.classList.add('show');
+      valid = false;
+    }
+    if (!valid) return;
 
-    if (activeCat === "OCUPACIONAIS") {
-      queryBuilder = queryBuilder.ilike('categoria', '%ocupacio%');
+    btn.classList.add('loading');
+    btn.disabled = true;
+    await new Promise(r => setTimeout(r, 1400));
+    btn.classList.remove('loading');
+    btn.disabled = false;
+
+    if (emailIn.value.trim() === 'admin' && pwInput.value === '1234') {
+      btn.style.background = '#1a7a4a';
+      btn.querySelector('.btn-text').textContent = '✓ Acesso autorizado';
+      setTimeout(() => { window.location.href = 'catalogo.html'; }, 800);
     } else {
-      queryBuilder = queryBuilder.in('categoria', [catLowerPlural, catLowerSingular]);
+      showToast('Usuário ou senha incorretos.');
+      pwInput.value = '';
+      pwInput.focus();
     }
-
-    const { data: filtered, error } = await queryBuilder;
-
-    if (error) throw error;
-
-    currentResults = filtered || [];
-    countEl.textContent = currentResults.length + " produto" + (currentResults.length !== 1 ? "s encontrado(s)" : " encontrado");
-
-    if (!currentResults.length) {
-      el.innerHTML = `<div class="empty"><i class="ti ti-zoom-cancel" aria-hidden="true"></i>Nenhum resultado para "${query}"</div>`;
-      return;
-    }
-
-    el.innerHTML = currentResults.map((item, index) => `
-      <div class="result-item" onclick="openModal(${index})">
-        <span class="result-name">${item.nome}</span>
-        <span class="result-price">${formatCurrency(item.preco)}</span>
-      </div>`).join("");
-
-  } catch (err) {
-    console.error("Erro na busca:", err);
-    el.innerHTML = `<div class="empty"><i class="ti ti-alert-triangle"></i>Erro ao carregar dados do Supabase.</div>`;
-  }
-}
-
-function openModal(index) {
-  if (index === null || currentResults[index] === undefined) return;
-  temporarySelectedLens = currentResults[index];
-  
-  document.getElementById("modal-lens-title").textContent = temporarySelectedLens.nome;
-  document.getElementById("modal-lens-cat").textContent = temporarySelectedLens.categoria;
-  document.getElementById("modal-lens-brand").textContent = temporarySelectedLens.marca;
-  document.getElementById("modal-lens-price").textContent = formatCurrency(temporarySelectedLens.preco);
-  document.getElementById("modal-overlay").style.display = "flex";
-}
-
-function closeModal(e) {
-  document.getElementById("modal-overlay").style.display = "none";
-  temporarySelectedLens = null;
-}
-
-function addSelectedToBudget() {
-  if (!temporarySelectedLens) return;
-  selectedLensForBudget = temporarySelectedLens;
-  
-  document.getElementById("budget-lens-name").textContent = selectedLensForBudget.nome;
-  document.getElementById("budget-bar").style.display = "flex";
-  
-  calculateTotal();
-  closeModal(null);
-}
-
-function calculateTotal() {
-  if (!selectedLensForBudget) return;
-  const lensPrice = parseFloat(selectedLensForBudget.preco) || 0;
-  const framePrice = parseFloat(document.getElementById("input-frame-price").value) || 0;
-  
-  const total = lensPrice + framePrice;
-  document.getElementById("budget-total-value").textContent = formatCurrency(total);
-}
-
-function clearBudget() {
-  selectedLensForBudget = null;
-  document.getElementById("input-frame-price").value = "";
-  document.getElementById("budget-lens-name").textContent = "-";
-  document.getElementById("budget-total-value").textContent = "R$ 0,00";
-  document.getElementById("budget-bar").style.display = "none";
-}
-
-function renderAll() { 
-  renderCategories(); 
-  renderBrandTabs(); 
-  renderResults(); 
-}
-
-document.getElementById("search").addEventListener("input", (e) => {
-  query = e.target.value;
-  renderResults();
-});
-
-renderAll();
+  });
 </script>
-
 </body>
 </html>
